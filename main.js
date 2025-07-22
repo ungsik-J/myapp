@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, screen } = require("electron");
+const { app, BrowserWindow, Menu, ipcMain, dialog, screen } = require("electron");
 const fs = require("fs");
 const path = require("path");
 
@@ -25,13 +25,14 @@ function createMainWindow() {
     preload: './preload.js',     // preload 스크립트 경로
     devTools: true,              // 개발자 도구 사용 가능 여부
     sandbox: false,              // 샌드박스 사용 여부
+    autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: true, // 보안 이슈 주의
       preload: path.join(__dirname, 'preload.js'),
     },
   });
-
+  Menu.setApplicationMenu(null);
   mainWindow.loadURL(REACT_DEV_URL);
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
