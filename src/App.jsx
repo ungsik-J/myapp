@@ -27,7 +27,7 @@ const modelPop = (param) => {
   );
   ipcRenderer.send("open-modal", data);
 };
-
+// background-color
 function App() {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
@@ -111,6 +111,10 @@ function App() {
     setFile(todos[index].file || null);
   };
 
+  const darkSwitch = (checked) => {
+    setIsDarkMode(checked)
+    root.style.backgroundColor = (checked ? 'rgb(31, 31, 31)' : 'rgba(255, 255, 255, 1)')
+  }
   return (
     <ConfigProvider
       theme={{
@@ -145,7 +149,7 @@ function App() {
             checkedChildren="🌙"
             unCheckedChildren="☀️"
             checked={isDarkMode}
-            onChange={(checked) => setIsDarkMode(checked)}
+            onChange={(checked) => darkSwitch(checked)}
           />
         </Space>
 
