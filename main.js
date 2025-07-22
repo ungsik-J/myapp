@@ -26,7 +26,7 @@ ipcMain.on("open-modal", (event, data) => {
   });
 
   modal.loadURL(
-    `file://C:/DevHome/React/HelloWorld/myapp/modal.html?data=${data}`
+    `file://D:/DevHome/React/HelloWorld/myapp/modal.html?data=${data}`
   );
 });
 
