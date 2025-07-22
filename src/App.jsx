@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Input,
   Button,
@@ -35,8 +35,12 @@ function App() {
   const [editIndex, setEditIndex] = useState(null);
   const [file, setFile] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false); // 💡 다크모드 상태
+  const inputRef = useRef(null);
 
   useEffect(() => {
+
+    inputRef.current?.focus();
+
     ipcRenderer.invoke("read-todos").then(setTodos);
 
     ipcRenderer.on("download-success", (_, name) => {
@@ -147,6 +151,7 @@ function App() {
 
         <Space direction="vertical" style={{ width: "100%", marginBottom: 16 }}>
           <Input
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="할 일을 입력하세요"
