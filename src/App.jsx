@@ -16,7 +16,9 @@ import {
   PaperClipOutlined,
 } from "@ant-design/icons";
 
+
 const { ipcRenderer } = window.require("electron");
+
 
 const modelPop = (param) => {
   const data = encodeURIComponent(
@@ -33,6 +35,7 @@ function App() {
   const [file, setFile] = useState(null);
 
   useEffect(() => {
+
     ipcRenderer.invoke("read-todos").then(setTodos);
 
     ipcRenderer.on("download-success", (_, name) => {
@@ -192,6 +195,10 @@ function App() {
       />
     </div>
   );
+}
+
+if (window.opener && !window.opener.closed) {
+  window.opener.close(); // 부모창 닫기
 }
 
 export default App;

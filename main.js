@@ -13,13 +13,30 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    resizable: true,
+    frame: true,
+    transparent: 80,
+    show: true,
+    title: 'TODO-LIST',
+    alwaysOnTop: true,
+    webPreferences: true,
+    nodeIntegration: false,      // 노드 모듈 사용 여부 (보안상 false 권장)
+    contextIsolation: true,      // context 분리 (보안 향상)
+    preload: './preload.js',     // preload 스크립트 경로
+    devTools: true,              // 개발자 도구 사용 가능 여부
+    sandbox: false,              // 샌드박스 사용 여부
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: true, // 보안 이슈 주의
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
   mainWindow.loadURL(REACT_DEV_URL);
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show()
+  })
+
 }
 
 function createModalWindow(data) {

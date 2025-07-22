@@ -1,5 +1,5 @@
 {
-  "name": "todo-app",
+  "name": "myapp",
   "main": "main.js",
   "scripts": {
     "start": "concurrently \"npm run react\" \"npm run electron\"",
