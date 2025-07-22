@@ -1,22 +1,38 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, screen } = require("electron");
 const fs = require("fs");
 const path = require("path");
-const { screen } = require("electron");
+
 let mainWindow;
 
 const dataPath = path.join(app.getPath("userData"), "todos.json");
+const isDev = process.env.NODE_ENV === "development";
+const REACT_DEV_URL = "http://localhost:3000";
+const MODAL_HTML_PATH = path.resolve(__dirname, "modal.html"); // 상대경로로 변경 권장
 
-ipcMain.on("open-modal", (event, data) => {
+function createMainWindow() {
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: false,
+      nodeIntegration: true, // 보안 이슈 주의
+    },
+  });
+
+  mainWindow.loadURL(REACT_DEV_URL);
+}
+
+function createModalWindow(data) {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const winWidth = 800;
-  const winHeight = 600;
+  const modalWidth = 800;
+  const modalHeight = 600;
 
   const modal = new BrowserWindow({
-    winWidth: width,
-    winHeight: height,
-    x: Math.round((width - winWidth) / 2),
-    y: Math.round((height - winHeight) / 2),
-    center: true,
+    width: modalWidth,
+    height: modalHeight,
+    x: Math.round((width - modalWidth) / 2),
+    y: Math.round((height - modalHeight) / 2),
     modal: true,
     parent: BrowserWindow.getFocusedWindow(),
     webPreferences: {
@@ -25,63 +41,55 @@ ipcMain.on("open-modal", (event, data) => {
     },
   });
 
-  modal.loadURL(
-    `file://D:/DevHome/React/HelloWorld/myapp/modal.html?data=${data}`
-  );
-});
-
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      contextIsolation: false,
-      nodeIntegration: true, // 보안 주의: 실제 앱 배포시 preload로 우회 필요
-    },
-  });
-
-  mainWindow.loadURL("http://localhost:3000"); // React dev server
+  modal.loadURL(`file://${MODAL_HTML_PATH}?data=${encodeURIComponent(data)}`);
 }
 
-app.whenReady().then(createWindow);
+// 앱 초기화
+app.whenReady().then(createMainWindow);
 
+// 모달 열기 이벤트
+ipcMain.on("open-modal", (event, data) => {
+  createModalWindow(data);
+});
+
+// 할 일 읽기
 ipcMain.handle("read-todos", async () => {
   try {
-    const data = fs.existsSync(dataPath)
-      ? fs.readFileSync(dataPath, "utf-8")
-      : "[]";
+    if (!fs.existsSync(dataPath)) return [];
+    const data = fs.readFileSync(dataPath, "utf-8");
     return JSON.parse(data);
   } catch (err) {
-    console.error(err);
+    console.error("읽기 오류:", err);
     return [];
   }
 });
 
+// 할 일 저장
 ipcMain.handle("write-todos", async (event, todos) => {
   try {
     fs.writeFileSync(dataPath, JSON.stringify(todos, null, 2));
     return { status: "success" };
   } catch (err) {
-    console.error(err);
-    return { status: "error" };
+    console.error("쓰기 오류:", err);
+    return { status: "error", message: err.message };
   }
 });
 
-
+// 파일 다운로드
 ipcMain.on("download-file", async (event, filePath) => {
   const fileName = path.basename(filePath);
-  const { canceled, filePath: savePath } = await dialog.showSaveDialog({
-    defaultPath: fileName,
-    title: "파일 저장",
-  });
+  try {
+    const { canceled, filePath: savePath } = await dialog.showSaveDialog({
+      defaultPath: fileName,
+      title: "파일 저장",
+    });
 
-  if (!canceled && savePath) {
-    try {
+    if (!canceled && savePath) {
       fs.copyFileSync(filePath, savePath);
       event.sender.send("download-success", fileName);
-    } catch (err) {
-      console.error("다운로드 실패:", err);
-      event.sender.send("download-failure", err.message);
     }
+  } catch (err) {
+    console.error("다운로드 실패:", err);
+    event.sender.send("download-failure", err.message);
   }
 });
