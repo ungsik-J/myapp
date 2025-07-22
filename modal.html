@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>HTML5 Example Page</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="HTML5 Example Page">
+
+  <script>
+
+    window.onload = () => {
+z
+      const urlParams = new URLSearchParams(window.location.search);
+      const data = JSON.parse(decodeURIComponent(urlParams.get("data")));
+
+      window.document.getElementById('pTitle').value = data.pObj.text
+      window.document.getElementById('pRegDate').innerHTML = data.pObj.date
+    }
+  </script>
+</head>
+
+<body>
+  <header>
+    <h1>HTML5</h1>
+    <h2>Made with <a href="https://html5example.com">HTML5 Example Page</a></h2>
+  </header>
+  <textarea id="pTitle"></textarea>
+  <p id="pRegDate"></p>
+</body>
+
+</html>
