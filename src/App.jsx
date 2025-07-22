@@ -190,55 +190,40 @@ function App() {
           bordered
           dataSource={todos}
           renderItem={(todo, i) => (
-            <List.Item
-              actions={[
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  onClick={() => startEditTodo(i)}
+            <div style={{ margin: '5px' }}>
+              <Typography.Text strong style={{ color: isDarkMode ? "#fff" : undefined }}>
+                {todo.text}
+              </Typography.Text>
+              {todo.memo && (
+                <Typography.Paragraph
+                  type="secondary"
+                  style={{ margin: 0, color: isDarkMode ? "#aaa" : undefined }}
                 >
-                  수정
-                </Button>,
+                  {todo.memo}
+                </Typography.Paragraph>
+              )}
+              {todo.file && (
                 <Button
-                  danger
-                  type="text"
-                  icon={<DeleteOutlined />}
-                  onClick={() => removeTodo(i)}
+                  type="link"
+                  icon={<PaperClipOutlined />}
+                  onClick={() => {
+                    ipcRenderer.send("download-file", todo.file.path);
+                  }}
+                  style={{ padding: 0 }}
                 >
-                  삭제
-                </Button>,
-              ]}
-            >
-              <div>
-                <Typography.Text strong style={{ color: isDarkMode ? "#fff" : undefined }}>
-                  {todo.text}
-                </Typography.Text>
-                {todo.memo && (
-                  <Typography.Paragraph
-                    type="secondary"
-                    style={{ margin: 0, color: isDarkMode ? "#aaa" : undefined }}
-                  >
-                    {todo.memo}
-                  </Typography.Paragraph>
-                )}
-                {todo.file && (
-                  <Button
-                    type="link"
-                    icon={<PaperClipOutlined />}
-                    onClick={() => {
-                      ipcRenderer.send("download-file", todo.file.path);
-                    }}
-                    style={{ padding: 0 }}
-                  >
-                    📎 {todo.file.name}
-                  </Button>
-                )}
+                  📎 {todo.file.name}
+                </Button>
+              )}
+              <hr style={{ borderStyle: "dashed", borderColor: "#e6e6e6ff", borderWidth: "0.5px 0 0 0" }} />
+              <div style={{ textAlign: "right" }}>
+                <Button type="text" icon={<EditOutlined />} onClick={() => startEditTodo(i)} > 수정 </Button>
+                <Button danger type="text" icon={<DeleteOutlined />} onClick={() => removeTodo(i)} > 삭제 </Button>
               </div>
-            </List.Item>
+            </div>
           )}
         />
       </div>
-    </ConfigProvider>
+    </ConfigProvider >
   );
 }
 export default App;
