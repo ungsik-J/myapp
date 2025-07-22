@@ -13,17 +13,20 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1024,
     height: 768,
-    resizable: false,
-    frame: false,
-    transparent: 80,
+    resizable: true,
+    frame: true,
+    transparent: 100,
+    parent: 'parent',
+    closable: true,
+    minimizable: true,
+    maximizable: true,
+    fullscreen: true,       // 전체 화면 여부
     show: true,
     title: 'TODO-LIST',
     alwaysOnTop: true,
-    nodeIntegration: false,      // 노드 모듈 사용 여부 (보안상 false 권장)
-    contextIsolation: true,      // context 분리 (보안 향상)
     preload: './preload.js',     // preload 스크립트 경로
     devTools: true,              // 개발자 도구 사용 가능 여부
-    sandbox: false,              // 샌드박스 사용 여부
+    sandbox: true,              // 샌드박스 사용 여부
     autoHideMenuBar: false,
     webPreferences: {
       contextIsolation: false,

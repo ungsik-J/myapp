@@ -7,6 +7,9 @@ import {
   Space,
   message,
   Upload,
+  Switch,
+  ConfigProvider,
+  theme,
 } from "antd";
 import {
   DeleteOutlined,
@@ -16,9 +19,7 @@ import {
   PaperClipOutlined,
 } from "@ant-design/icons";
 
-
 const { ipcRenderer } = window.require("electron");
-
 
 const modelPop = (param) => {
   const data = encodeURIComponent(
@@ -33,9 +34,9 @@ function App() {
   const [textarea, setTextarea] = useState("");
   const [editIndex, setEditIndex] = useState(null);
   const [file, setFile] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false); // 💡 다크모드 상태
 
   useEffect(() => {
-
     ipcRenderer.invoke("read-todos").then(setTodos);
 
     ipcRenderer.on("download-success", (_, name) => {
@@ -67,7 +68,7 @@ function App() {
     if (file) {
       newTodo.file = {
         name: file.name,
-        path: file.path, // Electron에서 local 경로 사용
+        path: file.path,
       };
     }
 
@@ -107,98 +108,132 @@ function App() {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 600, margin: "0 auto" }}>
-      <Typography.Title level={2}>📝 Todo List</Typography.Title>
-
-      <Space direction="vertical" style={{ width: "100%", marginBottom: 16 }}>
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="할 일을 입력하세요"
-          onPressEnter={addTodo}
-        />
-        <Input.TextArea
-          value={textarea}
-          onChange={(e) => setTextarea(e.target.value)}
-          placeholder="추가 메모 (선택 사항)"
-          rows={4}
-        />
-
-        {/* 첨부파일 선택 */}
-        <Upload
-          beforeUpload={(file) => {
-            setFile(file);
-            return false; // 자동 업로드 방지
+    <ConfigProvider
+      theme={{
+        algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+      }}
+    >
+      <div
+        style={{
+          padding: 24,
+          maxWidth: 600,
+          margin: "0 auto",
+          backgroundColor: isDarkMode ? "#1f1f1f" : "#fff",
+          color: isDarkMode ? "#fff" : "#000",
+          minHeight: "100vh",
+        }}
+      >
+        <Space
+          direction="horizontal"
+          style={{
+            justifyContent: "space-between",
+            width: "100%",
+            marginBottom: 16,
           }}
-          fileList={file ? [file] : []}
-          onRemove={() => setFile(null)}
-          maxCount={1}
         >
-          <Button icon={<PaperClipOutlined />}>첨부파일 선택</Button>
-        </Upload>
-
-        <Button
-          style={{ width: 600 }}
-          type="primary"
-          icon={editIndex !== null ? <CheckOutlined /> : <PlusOutlined />}
-          onClick={addTodo}
-        >
-          {editIndex !== null ? "수정 완료" : "추가"}
-        </Button>
-      </Space>
-
-      <List
-        bordered
-        dataSource={todos}
-        renderItem={(todo, i) => (
-          <List.Item
-            actions={[
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => startEditTodo(i)}
-              >
-                수정
-              </Button>,
-              <Button
-                danger
-                type="text"
-                icon={<DeleteOutlined />}
-                onClick={() => removeTodo(i)}
-              >
-                삭제
-              </Button>,
-            ]}
+          <Typography.Title
+            level={2}
+            style={{ color: isDarkMode ? "#fff" : "#000" }}
           >
-            <div>
-              <Typography.Text strong>{todo.text}</Typography.Text>
-              {todo.memo && (
-                <Typography.Paragraph type="secondary" style={{ margin: 0 }}>
-                  {todo.memo}
-                </Typography.Paragraph>
-              )}
-              {todo.file && (
-                <Button style={{ width: 500 }}
-                  type="link"
-                  icon={<PaperClipOutlined />}
-                  onClick={() => {
-                    ipcRenderer.send("download-file", todo.file.path);
-                  }}
-                  style={{ padding: 0 }}
+            📝 Todo List
+          </Typography.Title>
+          <Switch
+            checkedChildren="🌙"
+            unCheckedChildren="☀️"
+            checked={isDarkMode}
+            onChange={(checked) => setIsDarkMode(checked)}
+          />
+        </Space>
+
+        <Space direction="vertical" style={{ width: "100%", marginBottom: 16 }}>
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="할 일을 입력하세요"
+            onPressEnter={addTodo}
+          />
+          <Input.TextArea
+            value={textarea}
+            onChange={(e) => setTextarea(e.target.value)}
+            placeholder="추가 메모 (선택 사항)"
+            rows={4}
+          />
+
+          <Upload
+            beforeUpload={(file) => {
+              setFile(file);
+              return false;
+            }}
+            fileList={file ? [file] : []}
+            onRemove={() => setFile(null)}
+            maxCount={1}
+          >
+            <Button icon={<PaperClipOutlined />}>첨부파일 선택</Button>
+          </Upload>
+
+          <Button
+            style={{ width: "100%" }}
+            type="primary"
+            icon={editIndex !== null ? <CheckOutlined /> : <PlusOutlined />}
+            onClick={addTodo}
+          >
+            {editIndex !== null ? "수정 완료" : "추가"}
+          </Button>
+        </Space>
+
+        <List
+          bordered
+          dataSource={todos}
+          renderItem={(todo, i) => (
+            <List.Item
+              actions={[
+                <Button
+                  type="text"
+                  icon={<EditOutlined />}
+                  onClick={() => startEditTodo(i)}
                 >
-                  📎 {todo.file.name}
-                </Button>
-              )}
-            </div>
-          </List.Item>
-        )}
-      />
-    </div>
+                  수정
+                </Button>,
+                <Button
+                  danger
+                  type="text"
+                  icon={<DeleteOutlined />}
+                  onClick={() => removeTodo(i)}
+                >
+                  삭제
+                </Button>,
+              ]}
+            >
+              <div>
+                <Typography.Text strong style={{ color: isDarkMode ? "#fff" : undefined }}>
+                  {todo.text}
+                </Typography.Text>
+                {todo.memo && (
+                  <Typography.Paragraph
+                    type="secondary"
+                    style={{ margin: 0, color: isDarkMode ? "#aaa" : undefined }}
+                  >
+                    {todo.memo}
+                  </Typography.Paragraph>
+                )}
+                {todo.file && (
+                  <Button
+                    type="link"
+                    icon={<PaperClipOutlined />}
+                    onClick={() => {
+                      ipcRenderer.send("download-file", todo.file.path);
+                    }}
+                    style={{ padding: 0 }}
+                  >
+                    📎 {todo.file.name}
+                  </Button>
+                )}
+              </div>
+            </List.Item>
+          )}
+        />
+      </div>
+    </ConfigProvider>
   );
 }
-
-if (window.opener && !window.opener.closed) {
-  window.opener.close(); // 부모창 닫기
-}
-
 export default App;
