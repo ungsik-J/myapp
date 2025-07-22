@@ -14,7 +14,6 @@ function createMainWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: false,
       nodeIntegration: true, // 보안 이슈 주의
     },
