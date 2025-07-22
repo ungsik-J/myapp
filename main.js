@@ -66,3 +66,22 @@ ipcMain.handle("write-todos", async (event, todos) => {
     return { status: "error" };
   }
 });
+
+
+ipcMain.on("download-file", async (event, filePath) => {
+  const fileName = path.basename(filePath);
+  const { canceled, filePath: savePath } = await dialog.showSaveDialog({
+    defaultPath: fileName,
+    title: "파일 저장",
+  });
+
+  if (!canceled && savePath) {
+    try {
+      fs.copyFileSync(filePath, savePath);
+      event.sender.send("download-success", fileName);
+    } catch (err) {
+      console.error("다운로드 실패:", err);
+      event.sender.send("download-failure", err.message);
+    }
+  }
+});
