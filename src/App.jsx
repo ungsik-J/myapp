@@ -178,7 +178,7 @@ function App() {
                 </Typography.Paragraph>
               )}
               {todo.file && (
-                <Button
+                <Button style={{ width: 500 }}
                   type="link"
                   icon={<PaperClipOutlined />}
                   onClick={() => {
